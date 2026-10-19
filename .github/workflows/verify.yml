@@ -1,0 +1,22 @@
+name: Profile history verification
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  history-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan reachable history
+        run: >-
+          docker run --rm
+          -e GIT_CONFIG_COUNT=1
+          -e GIT_CONFIG_KEY_0=safe.directory
+          -e GIT_CONFIG_VALUE_0=/repo
+          -v "$PWD:/repo:ro"
+          ghcr.io/gitleaks/gitleaks:v8.24.2
+          git /repo --log-opts=--all --redact --no-banner
